@@ -203,9 +203,10 @@ if user_data:
 - Added proper error handling for both network and JSON parsing errors
 - Added docstring for better documentation
 - Added usage example with proper error checking
-```
 
 </details>
+
+```
 
 ### Creator Details
 - **Name**: Mustafa Khan
