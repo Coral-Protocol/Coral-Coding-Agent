@@ -206,7 +206,6 @@ if user_data:
 
 </details>
 
-```
 
 ### Creator Details
 - **Name**: Mustafa Khan
