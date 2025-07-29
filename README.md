@@ -194,7 +194,7 @@ def fetch_user_data(user_id, api_key):
 user_data = fetch_user_data(123, "your_api_key_here")
 if user_data:
     print(f"User name: {user_data.get('name', 'Unknown')}")
-```
+
 
 ## Changes Made:
 - Added `import requests` at the top
@@ -203,7 +203,7 @@ if user_data:
 - Added proper error handling for both network and JSON parsing errors
 - Added docstring for better documentation
 - Added usage example with proper error checking
-
+```
 </details>
 
 
