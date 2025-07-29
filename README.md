@@ -9,7 +9,6 @@ The Coral Coding Agent is responsible for writing code, making necessary changes
 Below are the tools and their descriptions:
 
 
-
 **Code Execution Tools**: The agent uses code execution tools to:
 - Write and execute code snippets
 - Create new codebases with proper structure
@@ -153,10 +152,57 @@ You can view the agents running in Dev Mode using the [Coral Studio UI](https://
 
 ```bash
 # Input:
-Coding Agent instruction
+Fix the issues in the code file @<reference of opened code file in editor>
 
 # Output:
-The desired output from the Coding Agent execution
+I've analyzed the code file and identified several issues. Here are the fixes:
+
+## Issues Found:
+1. Missing import statement for `requests` library
+2. Undefined variable `api_key` in the function
+3. Incorrect indentation in the try-except block
+4. Missing error handling for API response
+
+## Fixed Code:
+
+```python
+import requests
+import json
+
+def fetch_user_data(user_id, api_key):
+    """
+    Fetch user data from API
+    """
+    url = f"https://api.example.com/users/{user_id}"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching user data: {e}")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON response: {e}")
+        return None
+
+# Usage example
+user_data = fetch_user_data(123, "your_api_key_here")
+if user_data:
+    print(f"User name: {user_data.get('name', 'Unknown')}")
+```
+
+## Changes Made:
+- Added `import requests` at the top
+- Added `api_key` parameter to function signature
+- Fixed indentation in try-except block
+- Added proper error handling for both network and JSON parsing errors
+- Added docstring for better documentation
+- Added usage example with proper error checking
 ```
 
 </details>
