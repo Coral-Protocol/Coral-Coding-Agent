@@ -26,27 +26,36 @@ async def get_tools_description(tools):
         )
     return "\n".join(descriptions)
 
-async def create_coding_agent(tools):
+async def create_coding_agent(tools, project_dir=None):
     tools_description =  await get_tools_description(tools)
     print(tools_description)
+    
+    # Set project directory for file operations
+    if project_dir:
+        os.chdir(project_dir)
+        print(f"Changed working directory to: {project_dir}")
+    
     sys_msg = (
         f"""
         You are a "coding_agent", responsible for writing code, and making necessary changes and correction to code if there is any syntax error according to the library/documentation provided.
 
         1. Use 'wait_for_mentions(timeoutMs=60000)' to wait from instructions from other agents.
-        2. Only start working when the context7 agent provides the context, otherwise keep waiting.
-        3. When a mention is received, record the 'threadId' and 'senderId'.
-        4. Check if the message asks for writing a code snippet/codebase/code file, or correcting a code snippet/codebase/code file.
-        5. You can ONLY use the context provided by the context7 agent.(If context is not provided from context7 agent, then stop working and inform the user).
-        5. Work within the context of an existing codebase if provided, ensuring compatibility and consistency with the project's structure, dependencies, and conventions.
-        6. Identify and correct syntax errors, logical errors, or other issues in provided code, ensuring it runs as intended, depening on the user requirements.
-        7. Use the programming language specified by the user or infer the most suitable language based on context (e.g., file extensions, documentation, keywords, or project type).
-        7. Generate accurate, efficient, and well-structured code for a given codebase or user-specified task, adhering to best practices and the programming language specified by the user.
-        8.Return code snippets/ code files in a clean, readable, and properly formatted manner, tailored to the user's requirements (e.g., specific language, style guide, or context).
-        9. If the user asks for a codebase, make sure to create a new codebase with the correct structure, dependencies, and conventions.
-        10. If the message format is invalid or parsing fails, skip it silently.
-        11. Do not create threads; always use the `threadId` from the mention.
-        12. Wait for some time and repeat from step 1.
+        2. DO NOT AUTOMATICALLY ASSUME YOU ARE WORKING ON SOMETHING, UNTIL REQUESTED BY INTERFACE AGENT.
+        3. Understand the user query and request relevant documentations from context7 agent.
+        4. Only start working when the context7 agent provides the relevant documentations, else keep waiting.
+        5. When a mention is received, record the 'threadId' and 'senderId'.
+        6. Check if the message asks for writing a code snippet/codebase/code file, or correcting a code snippet/codebase/code file.
+        7. You can ONLY use the context provided by the context7 agent.(If context is not provided from context7 agent, then stop working and inform the user).
+        8. Work within the context of an existing codebase if provided, ensuring compatibility and consistency with the project's structure, dependencies, and conventions.
+        9. Identify and correct syntax errors, logical errors, or other issues in provided code, ensuring it runs as intended, depening on the user requirements.
+        10. Use the programming language specified by the user or infer the most suitable language based on context (e.g., file extensions, documentation, keywords, or project type).
+        11. Generate accurate, efficient, and well-structured code for a given codebase or user-specified task, adhering to best practices and the programming language specified by the user.
+        12. Return code snippets/ code files in a clean, readable, and properly formatted manner, tailored to the user's requirements (e.g., specific language, style guide, or context).
+        13. If the user asks for a codebase, make sure to create a new codebase with the correct structure, dependencies, and conventions.
+        14. If the message format is invalid or parsing fails, skip it silently.
+        15. Do not create threads; always use the `threadId` from the mention.
+        16. IMPORTANT: All file operations should be performed in the current working directory, which has been set to the project directory.
+        17. Wait for some time and repeat from step 1.
 
         These are the list of available tools: {tools_description}
         """
@@ -78,6 +87,14 @@ async def main():
         base_url = os.getenv("CORAL_SSE_URL")
         agentID = os.getenv("CORAL_AGENT_ID")
 
+    # Get project directory from environment variable
+    project_dir = os.getenv("PROJECT_DIR")
+    if project_dir:
+        print(f"Project directory specified: {project_dir}")
+        if not os.path.exists(project_dir):
+            print(f"Warning: Project directory {project_dir} does not exist")
+    else:
+        print("No PROJECT_DIR environment variable set, using current directory")
     
     coral_params = {
         "agentId": agentID,
@@ -108,7 +125,7 @@ async def main():
     tools = [tool for tool in tools if getattr(tool.func, '__name__', 'unknown_tool') in selected_tool_name]
     tools += CodeExecutionToolkit().get_tools()
 
-    camel_agent = await create_coding_agent(tools)
+    camel_agent = await create_coding_agent(tools, project_dir)
 
     while True:
         resp = await camel_agent.astep(get_user_message())
