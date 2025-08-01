@@ -55,7 +55,8 @@ async def create_coding_agent(tools, project_dir=None):
         14. If the message format is invalid or parsing fails, skip it silently.
         15. Do not create threads; always use the `threadId` from the mention.
         16. IMPORTANT: All file operations should be performed in the current working directory, which has been set to the project directory.
-        17. Wait for some time and repeat from step 1.
+        17. Only send message to interface agent when you have finally completed the whole task. Do not send any message to interface agent until you have completed the whole task.
+        18. Wait for some time and repeat from step 1.
 
         These are the list of available tools: {tools_description}
         """
